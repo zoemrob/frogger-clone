@@ -1,3 +1,54 @@
 body {
     text-align: center;
 }
+
+.hidden {
+    display: none;
+}
+
+main {
+    margin: 100px auto 0 auto;
+    width: 600px;
+    background-color: #bafcfa;
+    padding: 36px;
+    border-radius: 10px;
+    border: 10px solid #fcbaba;
+}
+
+main h1 {
+    margin-top: 0;
+}
+
+main table {
+    margin: 0 auto;
+    border-radius: 10px;
+}
+
+main table td {
+    background-color: #fcbaba;
+    border-radius: 15px;
+}
+
+main table td.selected,
+main table td.selected:hover {
+    box-shadow: 0 0 10px gold;
+}
+
+main table td:hover {
+    box-shadow: 0 0 10px white;
+}
+
+main table td img:hover {
+    transform: scale(1.05);
+    transition: ease;
+}
+
+main button {
+    margin-top: 36px;
+    font-size: 2em;
+    border-radius: 10px;
+}
+
+main button:focus {
+    outline: none;
+}
