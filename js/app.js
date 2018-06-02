@@ -1,95 +1,204 @@
-// // Enemies our player must avoid
-// const Enemy = function() {
-//     // Variables applied to each of our instances go here,
-//     // we've provided one for you to get started
-//
-//     // The image/sprite for our enemies, this uses
-//     // a helper we've provided to easily load images
-//     this.sprite = 'images/enemy-bug.png';
-// };
-//
-// // Update the enemy's position, required method for game
-// // Parameter: dt, a time delta between ticks
-// Enemy.prototype.update = function(dt) {
-//     // You should multiply any movement by the dt parameter
-//     // which will ensure the game runs at the same speed for
-//     // all computers.
-// };
-//
-// // Draw the enemy on the screen, required method for game
-// Enemy.prototype.render = function() {
-//     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-// };
+/**
+ * @description array of settings based on difficulty selected
+ * @type {*[]}
+ */
+const difficultyConfigs = [
+    {
+        difficulty: 'Easy',
+        width: 505,
+        height: 606,
+        rows: 6,
+        cols: 5,
+        enemies: 3,
+        enemyPos: [71, 154, 237],
+        plyrSrt: {
+            x: 203,
+            y: 403
+        }
+    },
+    {
+        difficulty: 'Medium',
+        width: 606,
+        height: 689,
+        rows: 7,
+        cols: 6,
+        enemies: 5,
+        enemyPos: [71, 154, 237, 320],
+        plyrSrt: {
+            x: 203,
+            y: 486
+        }
+    },
+    {
+        difficulty: 'Hard',
+        width: 505,
+        height: 772,
+        rows: 8,
+        cols: 5,
+        enemies: 6,
+        enemyPos: [71, 154, 237, 320, 403],
+        plyrSrt: {
+            x: 405,
+            y: 569
+        }
+    },
+    {
+        difficulty: 'Crazy',
+        width: 404,
+        height: 772,
+        rows: 8,
+        cols: 4,
+        enemies: 6,
+        enemyPos: [71, 154, 237, 320, 403],
+        plyrSrt: {
+            x: 102,
+            y: 569
+        }
+    }
+];
+// set default difficulty to 'Easy'
+let settings = difficultyConfigs[0];
 
+/**
+ * @class Template for enemies
+ */
 class Enemy {
+
+    /**
+     * @description returns available enemy positions based on difficulty
+     * @return {number[]} - positions available
+     */
+    static yPositions() {
+        return settings.enemyPos;
+    };
+
+    /**
+     * @description sets initial properties
+     * @var this.x - x coord for enemy
+     * @var this.y - y coord for enemy, selected based on random yPositions
+     * @var this.sprite - image resource
+     * @var this.speed - random speed
+     */
     constructor () {
-        this.x = 400;
-        this.y = 150;
+        this.x = 1;
+        // get random starting location
+        this.y = Enemy.yPositions()[Math.floor(Math.random() * Enemy.yPositions().length)];
         this.sprite = 'images/enemy-bug.png';
+        //this.speed = Math.floor(Math.random() * (350 - Math.floor(Math.random() * 50)) + 15);
+        this.speed = Math.floor(Math.random() * (350 - 75 + 1) + 75);
     }
 
+    /**
+     * @description called from Engine.update to increment
+     * @param {number} dt - time delta
+     */
     update (dt) {
-
+        this.x += this.speed * dt;
+        if (this.x >= ctx.canvas.clientWidth) {
+            this.recalculate();
+        }
+        this.checkCollision();
     }
 
-    render () {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-}
-
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-// const Player = function () {
-//     this.sprite = 'images/char-boy.png';
-// };
-//
-// Player.prototype.render = function() {
-//     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-// };
-//
-// Player.prototype.update = function () {
-//     this.handleInput();
-// };
-//
-// Player.prototype.handleInput = function (key) {
-//     if (key !== undefined) {
-//
-//     }
-// };
-
-class Player {
-    constructor () {
-        this.sprite = sessionStorage.getItem('char');
-        this.x = 203;
-        this.y = 403;
-    }
-
+    /**
+     * @description draws enemy accessing globally assigned ctx
+     */
     render () {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 
-    update () {
-
+    /**
+     * @description called every time an enemy exits the canvas
+     * allows the enemy speed to be re-calculated, and y loc to be randomized
+     */
+    recalculate () {
+        this.x = -15;
+        this.y = Enemy.yPositions()[Math.floor(Math.random() * Enemy.yPositions().length)];
+        this.speed = Math.floor(Math.random() * (350 - 75 + 1) + 75);
     }
 
-    handleInput (key) {
-        if (typeof key === "undefined") {
-
+    /**
+     * @description checks for collision with player
+     */
+    checkCollision () {
+        if (this.y === player.y && (this.x + 80 > player.x && this.x - 80 < player.x)) {
+            player.die();
         }
     }
 }
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-const allEnemies = [new Enemy(), new Enemy()];
-const player = new Player();
+/**
+ * @class represents player, handles movement and renders sprite
+ * @constructor
+ * @var this.sprite - image resource from session
+ * @var this.x - x coord on canvas for difficulty
+ * @var this.y - y coord on canvas for difficulty
+ * @var this.deaths - amount of collisions
+ */
+class Player {
+    constructor () {
+        this.sprite = sessionStorage.getItem('char');
+        this.x = settings.plyrSrt.x;
+        this.y = settings.plyrSrt.y;
+        this.deaths = 0;
+    }
 
-// character select screen
+    /**
+     * @description draws character image on canvas, called by Engine.render
+     */
+    render () {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+
+    /**
+     * @description handles KeyboardEvents
+     * @param key
+     */
+    handleInput (key) {
+        switch (key) {
+            case 'ArrowUp':
+                this.y -= this.y > 70 ? 83 : 0;
+                break;
+            case 'ArrowDown':
+                this.y += this.y <= settings.plyrSrt.y - 1 ? 83 : 0;
+                break;
+            case 'ArrowRight':
+                // does not allow past boundary of client width
+                this.x += this.x !== ctx.canvas.clientWidth - 100 ? 101 : 0;
+                break;
+            case 'ArrowLeft':
+                this.x -= this.x !== 1 ? 101: 0;
+                break;
+        }
+    }
+
+    /**
+     * @description checks position of player
+     * @return {boolean} - true if in water row
+     */
+    checkWin() {
+        if (this.y === -12) {
+            return true;
+        }
+    }
+
+    /**
+     * @description called on collision, resets location and increments deaths
+     */
+    die() {
+        this.y = settings.plyrSrt.y;
+        this.deaths++;
+    }
+}
+
+/**
+ * @description - On page load displays character select screen
+ * - after character and difficulty is selected, call Engine with appropriate settings
+ */
 const gameInit = () => {
     const charTable = document.getElementById('js-char-select'),
         startButton = document.getElementById('js-new-game'),
+        // mapping character image id to resource url
         imgMap = {
             "js-char-1": "images/char-boy.png",
             "js-char-2": "images/char-cat-girl.png",
@@ -100,10 +209,16 @@ const gameInit = () => {
     let selectedId = undefined;
 
     // set default if no character is selected.
-    sessionStorage.setItem('char', 'images/char-boy.png');
+    sessionStorage.setItem(
+        'char',
+        imgMap[document.querySelector('td.selected').firstElementChild.getAttribute('id')]
+    );
 
-    charTable.addEventListener('click', charSelectClick);
-
+    /**
+     * @description controls character selection by click
+     * stores selected character in sessionStorage
+     * @param {MouseEvent} e
+     */
     function charSelectClick (e) {
         selectedId = undefined;
         const prevSelected = document.querySelector('td.selected');
@@ -121,26 +236,28 @@ const gameInit = () => {
             sessionStorage.setItem('char', imgMap[selectedId]);
         }
     }
+    charTable.addEventListener('click', charSelectClick);
 
-    document.addEventListener('keydown', charSelectKey);
-
+    /**
+     * @description controls character selection/game start by keyboard press
+     * @param {KeyboardEvent} e
+     */
     function charSelectKey (e) {
         selectedId = undefined;
         const prevSelected = document.querySelector('td.selected');
         let next = undefined;
         if (e.key === 'ArrowRight') {
-            console.log(prevSelected);
             next = prevSelected.nextElementSibling;
-            console.log(next);
             if (next === null) {
                 next = prevSelected.parentElement.firstElementChild;
-                console.log(next);
             }
         } else if (e.key === 'ArrowLeft') {
             next = prevSelected.previousElementSibling;
             if (next === null) {
                 next = prevSelected.parentElement.lastElementChild;
             }
+        } else if (e.key === "Enter") {
+            startButton.click();
         }
 
         if (typeof next !== "undefined") {
@@ -153,24 +270,69 @@ const gameInit = () => {
             sessionStorage.setItem('char', imgMap[selectedId]);
         }
     }
+    document.addEventListener('keydown', charSelectKey);
 
-    startButton.addEventListener('click', () => {
-        const menu = document.querySelector('main');
-        menu.classList.toggle('hidden');
+    /**
+     * @description starts new game, calls Engine with difficulty selected,
+     * removes character select eventListeners, adds game and win-modal
+     * eventListeners
+     */
+    function newGame () {
+        const menu = document.querySelector('div.char-select'),
+            diffSelect = document.getElementById('js-difficulty'),
+            winPlayAgain = document.getElementById('js-play-again'),
+            diff = diffSelect.options[diffSelect.selectedIndex].value;
+        // globally available settings
+        settings = difficultyConfigs[diff];
+        let enemies = settings.enemies;
+
+        menu.classList.add('hidden');
         // initialize board
-        Engine();
-        // This listens for key presses and sends the keys to your
-        // Player.handleInput() method. You don't need to modify this.
-        document.addEventListener('keyup', e => {
-            const allowedKeys = {
-                37: 'left',
-                38: 'up',
-                39: 'right',
-                40: 'down'
-            };
-
-            player.handleInput(allowedKeys[e.keyCode]);
-        });
-    });
+        player = new Player();
+        do {
+            allEnemies.push(new Enemy());
+            enemies--
+        } while (enemies > 0);
+        // remove if it exists
+        document.removeEventListener('click', charSelectClick);
+        document.removeEventListener('keydown', charSelectKey);
+        document.removeEventListener('keyup', keyReplay);
+        winPlayAgain.removeEventListener('click', gameInit);
+        winPlayAgain.removeEventListener('click', replay);
+        startButton.removeEventListener('click', newGame);
+        Engine(settings);
+    }
+    startButton.addEventListener('click', newGame);
 };
+
+/**
+ * @description handles clearing of canvas, initializes new character, clears
+ * enemies, hides winModal and shows character select
+ */
+function replay() {
+    const menu = document.querySelector('div.char-select'),
+        winModal = document.getElementById('js-win-modal'),
+        // startButton = document.getElementById('js-new-game'),
+        canvas = document.querySelector('canvas');
+    winModal.classList.add('hidden');
+    canvas.remove();
+    menu.classList.remove('hidden');
+    player = new Player();
+    allEnemies = [];
+    gameInit();
+}
+
+/**
+ * @description wrapper for allowing "Enter" to trigger "Play Again" button
+ * @param {KeyboardEvent} e
+ */
+function keyReplay(e) {
+    if (e.key === 'Enter') {
+        replay();
+    }
+}
+
+// initializes variables globally to be accessible everywhere
+let player = new Player();
+let allEnemies = [];
 document.addEventListener('DOMContentLoaded', gameInit);
