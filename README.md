@@ -1,6 +1,11 @@
-frontend-nanodegree-arcade-game
-===============================
-
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
-
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+Frogger Clone
+=============
+## Features:
+* No dependencies required, all functionality native ES6 J, CSS3, and HTML5
+* Single Page application utilizing sessionStorage, no page reload required no matter how many replays.
+* Mouse and keyboard navigation on character selection.
+* Varying difficulties, dynamic board rendering based on difficulty selected.
+## How to play:
+* Select a character and a difficulty and hit "Start Game!" (Or go with defaults).
+* Navigate using the arrow keys to reach the water, watch out for the bugs!
+### _Try to beat "Crazy" difficulty with no deaths!_
