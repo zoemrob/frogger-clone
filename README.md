@@ -8,4 +8,5 @@ Frogger Clone
 ## How to play:
 * Select a character and a difficulty and hit "Start Game!" (Or go with defaults).
 * Navigate using the arrow keys to reach the water, watch out for the bugs!
+#### Play live at https://zoemrob.github.io/projects/frogger-clone/
 ### _Try to beat "Crazy" difficulty with no deaths!_
